@@ -6,6 +6,11 @@ SOURCES = $(wildcard *.c)
 TEST_SOURCES = $(filter-out $(EXCLUDE_FILES), $(SOURCES))
 OBJECTS = $(TEST_SOURCES:.c=.o)
 
+tt: 
+	@clear
+	@gcc ../main.c s21_decimal.a -o ../tt -lm
+	@./../tt
+
 s21_decimal.a: $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
 	ranlib s21_decimal.a
