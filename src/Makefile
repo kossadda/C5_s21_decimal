@@ -8,8 +8,8 @@ OBJECTS = $(TEST_SOURCES:.c=.o)
 
 tt: 
 	@clear
-	@gcc ../main.c s21_decimal.a -o ../tt -lm
-	@./../tt
+	@gcc ../main.c s21_decimal.a -lm -o test
+	@./test
 
 s21_decimal.a: $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
@@ -18,7 +18,7 @@ s21_decimal.a: $(OBJECTS)
 
 test: 
 	@gcc $(CFLAGS) $(SOURCES) -lm -o test -lcheck -lsubunit -lgcov
-	@./test
+	@./a.out
 
 gcov_report:
 	@gcc $(CFLAGS) -fprofile-arcs -ftest-coverage $(SOURCES) -lm -o test -lcheck -lsubunit -lgcov
