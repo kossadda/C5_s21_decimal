@@ -1,4 +1,4 @@
-#include "s21_decimal.h"
+#include "../s21_decimal.h"
 
 // Оператор сравнения ==
 int s21_is_equal(s21_decimal value_1, s21_decimal value_2) {

@@ -1,8 +1,6 @@
 #include <check.h>
-#include <math.h>
-#include <stdlib.h>
 
-#include "s21_decimal.h"
+#include "../s21_decimal.h"
 
 void test_add(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   for (int i = 0; i < size_m1; i++) {

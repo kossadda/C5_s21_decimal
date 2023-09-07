@@ -1,4 +1,4 @@
-#include "s21_decimal.h"
+#include "../s21_decimal.h"
 
 // Перевод числа из int в decimal
 int s21_from_int_to_decimal(int src, s21_decimal *dst) {

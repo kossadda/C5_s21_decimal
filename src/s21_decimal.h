@@ -57,14 +57,15 @@ int s21_negate(s21_decimal value, s21_decimal *result);
 bool normalization(s21_decimal *value_1, s21_decimal *value_2);
 void post_normalization(s21_decimal *value_1, s21_decimal *value_2,
                         s21_decimal temp1, s21_decimal temp2);
+int check_small_value(s21_decimal *value_1, s21_decimal *value_2);
 
 // Вспомогательные функции
 
-void s21_add_logic(s21_decimal value_1, s21_decimal value_2,
+int s21_add_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
 void s21_sub_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
-void s21_mul_logic(s21_decimal value_1, s21_decimal value_2,
+int s21_mul_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
 void s21_div_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);

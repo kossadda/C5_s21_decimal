@@ -1,27 +1,25 @@
 CC = gcc
 CFLAGS = -Wall -Werror -Wextra -std=c11 -pedantic
 
-EXCLUDE_FILES = s21_test.c
-SOURCES = $(wildcard *.c)
-TEST_SOURCES = $(filter-out $(EXCLUDE_FILES), $(SOURCES))
-OBJECTS = $(TEST_SOURCES:.c=.o)
+SOURCES = $(wildcard functions/*.c)
+OBJECTS = $(SOURCES:.c=.o)
 
-tt: 
+tt: clean s21_decimal.a
 	@clear
-	@gcc ../main.c s21_decimal.a -lm -o test
-	@./test
+	@gcc tests/main.c s21_decimal.a -lm -o temp
+	@./temp
 
-s21_decimal.a: $(OBJECTS)
+s21_decimal.a: clean $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
 	ranlib s21_decimal.a
 	rm -rf *.o
 
-test: 
-	@gcc $(CFLAGS) $(SOURCES) -lm -o test -lcheck -lsubunit -lgcov
-	@./a.out
+test: clean
+	@gcc $(CFLAGS) $(SOURCES) tests/s21_test.c -lm -o test -lcheck -lsubunit -lgcov
+	@./test
 
 gcov_report:
-	@gcc $(CFLAGS) -fprofile-arcs -ftest-coverage $(SOURCES) -lm -o test -lcheck -lsubunit -lgcov
+	@gcc $(CFLAGS) -fprofile-arcs -ftest-coverage $(SOURCES) tests/s21_test.c -lm -o test -lcheck -lsubunit -lgcov
 	mkdir -p gcov_report
 	./test
 	gcovr -r . --html --html-details -o gcov_report/coverage.html
@@ -29,7 +27,7 @@ gcov_report:
 
 clean:
 	clear
-	@rm -rf *.o *.a *.gc* tt git my gcov_report
+	@rm -rf functions/*.o *.a *.gc* tt git my gcov_report
 
 all: s21_decimal.a
 

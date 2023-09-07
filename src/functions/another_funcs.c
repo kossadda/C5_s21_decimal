@@ -1,4 +1,4 @@
-#include "s21_decimal.h"
+#include "../s21_decimal.h"
 
 // ========================================================================================================
 // Работа со степенями
@@ -73,18 +73,31 @@ void post_normalization(s21_decimal *value_1, s21_decimal *value_2,
   }
 }
 
+int check_small_value(s21_decimal *value_1, s21_decimal *value_2) {
+  int ret_value = 0;
+  if(s21_get_scale(*value_1) > 28 && s21_get_scale(*value_2) > 28) {
+    clean_decimal(value_1);
+    clean_decimal(value_2);
+    ret_value = 2;
+  }
+  return ret_value;
+}
+
 // ========================================================================================================
 // Вспомогательные функции
 // ========================================================================================================
 
 // Логика сложения двух чисел decimal
-void s21_add_logic(s21_decimal value_1, s21_decimal value_2,
+int s21_add_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result) {
   clean_decimal(result);
+  int sign1 = s21_get_sign(value_1);
+  int sign2 = s21_get_sign(value_2);
   s21_big_decimal res_big = {0};
   big_decimal_add(small_decimal_to_big(value_1), small_decimal_to_big(value_2),
                   &res_big);
   if (big_decimal_is_empty(res_big)) *result = big_decimal_to_small(res_big);
+  return (!big_decimal_is_empty(res_big)) ? (((sign1 && sign2) || (sign1 && !sign2)) ? 2 : 1) : 0;
 }
 
 // Логика вычитания двух чисел decimal
@@ -98,13 +111,16 @@ void s21_sub_logic(s21_decimal value_1, s21_decimal value_2,
 }
 
 // Логика умножения двух чисел decimal
-void s21_mul_logic(s21_decimal value_1, s21_decimal value_2,
+int s21_mul_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result) {
   clean_decimal(result);
+  int sign1 = s21_get_sign(value_1);
+  int sign2 = s21_get_sign(value_2);
   s21_big_decimal res_big = {{0, 0, 0, 0}};
   big_decimal_mul(small_decimal_to_big(value_1), small_decimal_to_big(value_2),
                   &res_big);
-  *result = big_decimal_to_small(res_big);
+  if (big_decimal_is_empty(res_big)) *result = big_decimal_to_small(res_big);
+  return (!big_decimal_is_empty(res_big)) ? (((!sign1 && sign2) || (sign1 && !sign2)) ? 2 : 1) : 0;
 }
 
 // Логика деления двух чисел decimal
@@ -279,7 +295,8 @@ void big_decimal_sub(s21_big_decimal value_1, s21_big_decimal value_2,
 void big_decimal_mul(s21_big_decimal value_1, s21_big_decimal value_2,
                      s21_big_decimal *result) {
   clean_big_decimal(result);
-  int error = 0, count = 0;
+  int error = 0;
+  int count = 0;
   for (int i = 0; i < 224 && !error; i++) {
     if (get_big_decimal_bit(value_2, i)) {
       error = shift_big_decimal_left(&value_1, i - count);
