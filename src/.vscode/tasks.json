@@ -7,11 +7,9 @@
             "command": "gcc",
             "args": [
                 "-g",
-                "*.c",
+                "tests/main.c",
+                "functions/*.c",
                 "-lm",
-                "-lcheck",
-                "-lsubunit",
-                "-lgcov"
             ],
             "group": {
                 "kind": "build",

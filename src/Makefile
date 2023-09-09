@@ -7,12 +7,14 @@ OBJECTS = $(SOURCES:.c=.o)
 tt: clean s21_decimal.a
 	@clear
 	@gcc tests/main.c s21_decimal.a -lm -o temp
+	@gcc ../s21_decimal1/src/1.c ../s21_decimal1/src/s21_decimal.a -lm -o temp1
+	@./temp1
 	@./temp
 
 s21_decimal.a: clean $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
 	ranlib s21_decimal.a
-	rm -rf *.o
+	rm -rf functions/*.o
 
 test: clean
 	@gcc $(CFLAGS) $(SOURCES) tests/s21_test.c -lm -o test -lcheck -lsubunit -lgcov

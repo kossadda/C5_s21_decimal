@@ -4,9 +4,9 @@ void dprint(s21_decimal val) {printf("%u, %u, %u, %u\n", val.bits[0], val.bits[1
 
 int main() {
     float tmp2 = MINUS;
-    s21_decimal n1 = {{42949, 234234, 0, MINUS}};
-    s21_decimal n2 = {{2, 0, 0, e1*14}};
+    s21_decimal n1 = {{42949, 0, 1222111, 0}};
+    s21_decimal n2 = {{1, 0, 0, e1*7}};
     s21_decimal res = {{0}};
-    printf("%d\n", s21_div(n1, n2, &res));
+    printf("%d\n", s21_mod(n1, n2, &res));
     dprint(res);
 }

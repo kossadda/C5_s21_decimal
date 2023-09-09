@@ -136,23 +136,28 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
 // Остаток от деления двух чисел decimal
 int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-  bool sign1 = s21_get_sign(value_1);
-  s21_big_decimal big_res = {0};
-  if (s21_get_scale(value_1) < s21_get_scale(value_2))
-    normalization(&value_1, &value_2);
-  else if (s21_get_scale(value_1) > s21_get_scale(value_2))
-    normalization(&value_2, &value_1);
-  if (decimal_is_empty(value_2)) value_2 = (s21_decimal){{1, 0, 0, 0}};
-  s21_set_sign(&value_1, 0);
-  s21_set_sign(&value_2, 0);
-  if (s21_is_less(value_1, value_2)) {
-    *result = value_1;
+  int ret_value = 0;
+  if(decimal_is_empty(value_2)) {
+    ret_value = 3;
   } else {
-    if (s21_is_not_equal(value_1, value_2))
-      *result = big_decimal_div(small_decimal_to_big(value_1),
-                                small_decimal_to_big(value_2), &big_res);
-    s21_set_scale(result, s21_get_scale(value_1));
+    bool sign1 = s21_get_sign(value_1);
+    s21_big_decimal big_res = {0};
+    if (s21_get_scale(value_1) < s21_get_scale(value_2))
+      normalization(&value_1, &value_2);
+    else if (s21_get_scale(value_1) > s21_get_scale(value_2))
+      normalization(&value_2, &value_1);
+    if (decimal_is_empty(value_2)) value_2 = (s21_decimal){{1, 0, 0, 0}};
+    s21_set_sign(&value_1, 0);
+    s21_set_sign(&value_2, 0);
+    if (s21_is_less(value_1, value_2)) {
+      *result = value_1;
+    } else {
+      if (s21_is_not_equal(value_1, value_2))
+        *result = big_decimal_div(small_decimal_to_big(value_1),
+                                  small_decimal_to_big(value_2), &big_res);
+      s21_set_scale(result, s21_get_scale(value_1));
+    }
+    s21_set_sign(result, sign1);
   }
-  s21_set_sign(result, sign1);
-  return 0;
+  return ret_value;
 }
