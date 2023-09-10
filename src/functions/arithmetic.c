@@ -140,24 +140,39 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   if(decimal_is_empty(value_2)) {
     ret_value = 3;
   } else {
+    s21_decimal temp2 = value_2;
     bool sign1 = s21_get_sign(value_1);
+    bool sign2 = s21_get_sign(value_2);
     s21_big_decimal big_res = {0};
-    if (s21_get_scale(value_1) < s21_get_scale(value_2))
+    if (s21_get_scale(value_1) < s21_get_scale(value_2)) {
       normalization(&value_1, &value_2);
-    else if (s21_get_scale(value_1) > s21_get_scale(value_2))
+    } else if (s21_get_scale(value_1) > s21_get_scale(value_2)) {
       normalization(&value_2, &value_1);
+    }
     if (decimal_is_empty(value_2)) value_2 = (s21_decimal){{1, 0, 0, 0}};
     s21_set_sign(&value_1, 0);
     s21_set_sign(&value_2, 0);
     if (s21_is_less(value_1, value_2)) {
       *result = value_1;
     } else {
-      if (s21_is_not_equal(value_1, value_2))
-        *result = big_decimal_div(small_decimal_to_big(value_1),
-                                  small_decimal_to_big(value_2), &big_res);
-      s21_set_scale(result, s21_get_scale(value_1));
+      if (s21_is_not_equal(value_1, value_2)) {
+        *result = big_decimal_div(small_decimal_to_big(value_1), small_decimal_to_big(value_2), &big_res);
+      }
+      if (!decimal_is_empty(*result)) s21_set_scale(result, s21_get_scale(value_1));
+      int cmp = 0;
+      s21_decimal temp1 = big_decimal_to_small(big_res);
+      for(int i = 0; i < 3; i++) {
+        if(temp1.bits[i] == value_1.bits[i]) cmp++;
+      }
+      if(!decimal_is_empty(temp2) && cmp == 3 && temp2.bits[0] != 1 && value_2.bits[0] == 1) {
+        if ((sign1 && !sign2) || (!sign1 && sign2)) ret_value = 2;
+        else ret_value = 1;
+        clean_decimal(result);
+      }
     }
-    s21_set_sign(result, sign1);
+    if (!decimal_is_empty(*result)) {
+      if ((sign1 && !sign2) || (!sign1 && sign2)) s21_set_sign(result, sign1);
+    }
   }
   return ret_value;
 }

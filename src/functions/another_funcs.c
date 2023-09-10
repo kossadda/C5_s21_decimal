@@ -83,6 +83,14 @@ int check_small_value(s21_decimal *value_1, s21_decimal *value_2) {
   return ret_value;
 }
 
+unsigned int factor_exp(double number, int accuracy) {
+  unsigned int length = 10;
+  for(int i = 1; i < accuracy; i++) length *= 10;
+  long double double_tmp = ceill((number - truncl(number)) * powl(10, accuracy) - 0.5);
+  unsigned int integ = (unsigned int)number * length + (unsigned int)double_tmp;
+  return integ;
+}
+
 // ========================================================================================================
 // Вспомогательные функции
 // ========================================================================================================

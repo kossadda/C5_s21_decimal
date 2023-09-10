@@ -12,6 +12,8 @@
 #define ALL 0xFFFFFFFF
 #define MAX 4294967296
 #define e1 65536
+#define s21_isnan(X) ((X) != (X))
+#define s21_isinf(X) ((X) == (1.0 / 0.0))
 
 typedef struct {
   unsigned int bits[4];
@@ -70,6 +72,7 @@ int s21_mul_logic(s21_decimal value_1, s21_decimal value_2,
 void s21_div_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
 int last_num_in_decimal(s21_decimal value);
+unsigned int factor_exp(double number, int accuracy);
 void clean_decimal(s21_decimal *value);
 int length_num(unsigned long long num);
 int decimal_is_empty(s21_decimal value);
