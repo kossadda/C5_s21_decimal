@@ -23,18 +23,22 @@ int s21_from_decimal_to_int(s21_decimal src, int *dst) {
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
   unsigned int res = 0;
   if(!(s21_isinf(src) || s21_isinf(-src) || s21_isnan(src) || src == 0)) {
+    if(src < 0) {
+      src *= -1;
+      s21_set_sign(dst, 1);
+    }
     int exp_value = 0;
     int length_int_part = length_num((unsigned long long)fabs(src));
     if(length_int_part < 7) {
-      exp_value = 7 - length_int_part;
-      res = factor_exp((double)src, exp_value);
-      for (int i = 7; i >= 0; i--) {
-        if(res % 10 == 0) {
-          res /= 10;
-          exp_value--;
-        } else i = -1;
+      while (!length_num((unsigned long long)fabs(src * 10))) {
+        if(s21_isinf(src)) break;
+        src *= 10;
+        exp_value++;
       }
-      if (res == 0) exp_value = 0;
+      if(src != (unsigned int)src) {
+        res = factor_exp((double)src, 7 - length_int_part);
+        exp_value += 7 - length_int_part;
+      } else res = (unsigned int)src;
     } else {
       int round_val = 0;
       for(int i = 0; i < length_int_part - 7; i++) {
@@ -44,14 +48,17 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
       res = truncf(src);
       if (round_val > 5) res++;
     }
-    dst->bits[0] = res;
-    s21_set_scale(dst, exp_value);
+    if(exp_value <= 35 && !s21_isinf(src)) {
+      dst->bits[0] = res;
+      s21_set_scale(dst, exp_value);
+    }
   }
-  return (s21_isinf(src) || s21_isinf(-src) || s21_isnan(src) || res == 0) ? 1 : 0;
+  return (s21_isinf(src) || s21_isinf(-src) || s21_isnan(src) || (res == 0 && src)) ? 1 : 0;
 }
 
 // Перевод числа из decimal в float
 int s21_from_decimal_to_float(s21_decimal src, float *dst) {
+  bool small_value = false;
   long double res = (long double)src.bits[2] * (long double)powf(2, 64) +
                     (long double)src.bits[1] * (long double)powl(2, 32) +
                     (long double)src.bits[0];
@@ -62,5 +69,12 @@ int s21_from_decimal_to_float(s21_decimal src, float *dst) {
   }
   if (s21_get_sign(src)) res *= -1;
   *dst = (float)res;
-  return 0;
+  float temp_dst = *dst;
+  for(int i = 0; i < 28; i++) {
+    if (!length_num(temp_dst * 10)) {
+      temp_dst *= 10;
+      small_value = true;
+    } else small_value = false;
+  }
+  return (!decimal_is_empty(src) && small_value) ? 1 : 0;
 }
