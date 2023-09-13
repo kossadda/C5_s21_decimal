@@ -8,7 +8,9 @@ int s21_truncate(s21_decimal value, s21_decimal *result) {
   }
   *result = big_decimal_to_small(temp);
   s21_set_scale(result, 0);
-  if (s21_get_sign(value)) s21_set_sign(result, 1);
+  if (s21_get_sign(value)) {
+    s21_set_sign(result, 1);
+  }
   return 0;
 }
 
@@ -25,10 +27,11 @@ int s21_floor(s21_decimal value, s21_decimal *result) {
 // Замена знака числа decimal на противоположный
 int s21_negate(s21_decimal value, s21_decimal *result) {
   *result = value;
-  if (s21_get_sign(value))
+  if (s21_get_sign(value)) {
     s21_set_sign(result, 0);
-  else
+  } else {
     s21_set_sign(result, 1);
+  }
   return 0;
 }
 
@@ -48,10 +51,11 @@ int s21_round(s21_decimal value, s21_decimal *result) {
     unsigned long long next_val = temp.bits[0] + 1;
     if ((round_val > 5 && round_val <= 9) ||
         (round_val == 5 && next_val % 2 == 0)) {
-      if (s21_get_sign(value))
+      if (s21_get_sign(value)) {
         s21_sub(value, (s21_decimal){{1, 0, 0, 0}}, &value);
-      else
+      } else {
         s21_add(value, (s21_decimal){{1, 0, 0, 0}}, &value);
+      }
     }
   }
   *result = value;

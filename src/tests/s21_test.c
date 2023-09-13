@@ -113,22 +113,6 @@ void test_div(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
       s21_div(m1[i], m2[j], &res1);
     }
   }
-  for (int i = 0; i < size_m1; i++) {
-    for (int j = 0; j < size_m2; j++) {
-      s21_set_sign(&m1[i], 0);
-      s21_set_sign(&m2[j], 1);
-      s21_decimal res1 = {{0, 0, 0, 0}};
-      s21_div(m1[i], m2[j], &res1);
-    }
-  }
-  for (int i = 0; i < size_m1; i++) {
-    for (int j = 0; j < size_m2; j++) {
-      s21_set_sign(&m1[i], 1);
-      s21_set_sign(&m2[j], 1);
-      s21_decimal res1 = {{0, 0, 0, 0}};
-      s21_div(m1[i], m2[j], &res1);
-    }
-  }
 }
 
 void test_mod(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {

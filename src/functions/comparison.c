@@ -2,15 +2,18 @@
 
 // Оператор сравнения ==
 int s21_is_equal(s21_decimal value_1, s21_decimal value_2) {
-  if (s21_get_scale(value_2) > s21_get_scale(value_1))
+  if (s21_get_scale(value_2) > s21_get_scale(value_1)) {
     normalization(&value_1, &value_2);
-  if (s21_get_scale(value_1) > s21_get_scale(value_2))
+  } else if (s21_get_scale(value_1) > s21_get_scale(value_2)) {
     normalization(&value_2, &value_1);
+  }
   int equal = 0;
   for (int i = 0; i < 4; i++) {
     if (value_1.bits[i] == value_2.bits[i]) equal++;
   }
-  if (s21_get_sign(value_1) != s21_get_sign(value_2)) equal = 0;
+  if (s21_get_sign(value_1) != s21_get_sign(value_2)) {
+    equal = 0;
+  }
   return (equal == 4) ? 1 : 0;
 }
 
@@ -21,10 +24,11 @@ int s21_is_not_equal(s21_decimal value_1, s21_decimal value_2) {
 
 // Оператор сравнения <
 int s21_is_less(s21_decimal value_1, s21_decimal value_2) {
-  if (s21_get_scale(value_2) > s21_get_scale(value_1))
+  if (s21_get_scale(value_2) > s21_get_scale(value_1)) {
     normalization(&value_1, &value_2);
-  if (s21_get_scale(value_1) > s21_get_scale(value_2))
+  } else if (s21_get_scale(value_1) > s21_get_scale(value_2)) {
     normalization(&value_2, &value_1);
+  }
   int max_rank1 = 0;
   int max_rank2 = 0;
   int ret_val = 0;
@@ -32,13 +36,25 @@ int s21_is_less(s21_decimal value_1, s21_decimal value_2) {
   for (; i >= 0; i--) {
     max_rank1 = s21_get_bit(value_1, i);
     max_rank2 = s21_get_bit(value_2, i);
-    if (max_rank1 != max_rank2) break;
+    if (max_rank1 != max_rank2) {
+      break;
+    }
   }
-  if (s21_get_bit(value_1, i) < s21_get_bit(value_2, i)) ret_val = 1;
-  if (s21_get_sign(value_1) && !s21_get_sign(value_2)) ret_val = 1;
-  if (!s21_get_sign(value_1) && s21_get_sign(value_2)) ret_val = 0;
-  if (s21_get_sign(value_1) && s21_get_sign(value_2)) ret_val ^= 1;
-  if (s21_is_equal(value_1, value_2)) ret_val = 0;
+  if (s21_get_bit(value_1, i) < s21_get_bit(value_2, i)) {
+    ret_val = 1;
+  }
+  if (s21_get_sign(value_1) && !s21_get_sign(value_2)) {
+    ret_val = 1;
+  }
+  if (!s21_get_sign(value_1) && s21_get_sign(value_2)) {
+    ret_val = 0;
+  }
+  if (s21_get_sign(value_1) && s21_get_sign(value_2)) {
+    ret_val ^= 1;
+  }
+  if (s21_is_equal(value_1, value_2)) {
+    ret_val = 0;
+  }
   return ret_val;
 }
 
