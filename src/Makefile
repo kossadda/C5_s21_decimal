@@ -7,8 +7,8 @@ OBJECTS = $(SOURCES:.c=.o)
 tt: clean s21_decimal.a
 	@clear
 	@gcc tests/main.c s21_decimal.a -lm -o temp
-	@gcc ../s21_decimal1/src/1.c ../s21_decimal1/src/s21_decimal.a -lm -o temp1
-	@./temp1
+# @gcc ../s21_decimal1/src/1.c ../s21_decimal1/src/s21_decimal.a -lm -o temp1
+# @./temp1
 	@./temp
 
 s21_decimal.a: clean $(OBJECTS)

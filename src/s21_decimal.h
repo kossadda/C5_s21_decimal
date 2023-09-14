@@ -69,7 +69,7 @@ void s21_sub_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
 int s21_mul_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
-void s21_div_logic(s21_decimal value_1, s21_decimal value_2,
+int s21_div_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
 int last_num_in_decimal(s21_decimal value);
 unsigned int factor_exp(double number, int accuracy);
@@ -97,7 +97,7 @@ void big_decimal_sub(s21_big_decimal value_1, s21_big_decimal value_2,
                      s21_big_decimal *result);
 void big_decimal_mul(s21_big_decimal value_1, s21_big_decimal value_2,
                      s21_big_decimal *result);
-s21_decimal big_decimal_div(s21_big_decimal value_1, s21_big_decimal value_2,
+s21_big_decimal big_decimal_div(s21_big_decimal value_1, s21_big_decimal value_2,
                             s21_big_decimal *result);
 int big_decimal_is_empty(s21_big_decimal value);
 int s21_big_decimal_equal(s21_big_decimal value_1, s21_big_decimal value_2);

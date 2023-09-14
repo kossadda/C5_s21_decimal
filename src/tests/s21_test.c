@@ -2,6 +2,9 @@
 
 #include "../s21_decimal.h"
 
+#define s21_inf 1.0 / 0.0
+#define s21_nan 0.0 / 0.0
+
 void test_add(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   for (int i = 0; i < size_m1; i++) {
     for (int j = 0; j < size_m2; j++) {
@@ -106,25 +109,11 @@ void test_div(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
       s21_div(m1[i], m2[j], &res1);
     }
   }
-  for (int i = 0; i < size_m1; i++) {
-    for (int j = 0; j < size_m2; j++) {
-      s21_set_sign(&m1[i], 1);
-      s21_decimal res1 = {{0, 0, 0, 0}};
-      s21_div(m1[i], m2[j], &res1);
-    }
-  }
 }
 
 void test_mod(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   for (int i = 0; i < size_m1; i++) {
     for (int j = 0; j < size_m2; j++) {
-      s21_decimal res1 = {{0, 0, 0, 0}};
-      s21_mod(m1[i], m2[j], &res1);
-    }
-  }
-  for (int i = 0; i < size_m1; i++) {
-    for (int j = 0; j < size_m2; j++) {
-      s21_set_sign(&m1[i], 1);
       s21_decimal res1 = {{0, 0, 0, 0}};
       s21_mod(m1[i], m2[j], &res1);
     }
@@ -139,8 +128,7 @@ void test_equal(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   }
 }
 
-void test_not_equal(s21_decimal m1[], s21_decimal m2[], int size_m1,
-                    int size_m2) {
+void test_not_equal(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   for (int i = 0; i < size_m1; i++) {
     for (int j = 0; j < size_m2; j++) {
       s21_is_not_equal(m1[i], m2[j]);
@@ -156,8 +144,7 @@ void test_less(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   }
 }
 
-void test_less_eq(s21_decimal m1[], s21_decimal m2[], int size_m1,
-                  int size_m2) {
+void test_less_eq(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   for (int i = 0; i < size_m1; i++) {
     for (int j = 0; j < size_m2; j++) {
       s21_is_less_or_equal(m1[i], m2[j]);
@@ -165,8 +152,7 @@ void test_less_eq(s21_decimal m1[], s21_decimal m2[], int size_m1,
   }
 }
 
-void test_greater(s21_decimal m1[], s21_decimal m2[], int size_m1,
-                  int size_m2) {
+void test_greater(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   for (int i = 0; i < size_m1; i++) {
     for (int j = 0; j < size_m2; j++) {
       s21_is_greater(m1[i], m2[j]);
@@ -174,8 +160,7 @@ void test_greater(s21_decimal m1[], s21_decimal m2[], int size_m1,
   }
 }
 
-void test_greater_eq(s21_decimal m1[], s21_decimal m2[], int size_m1,
-                     int size_m2) {
+void test_greater_eq(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   for (int i = 0; i < size_m1; i++) {
     for (int j = 0; j < size_m2; j++) {
       s21_is_greater_or_equal(m1[i], m2[j]);
@@ -257,10 +242,11 @@ void test_float_dec(float value[], int size_m5) {
 }
 
 void test_dec_float(s21_decimal m1[], int size_m1) {
+  float res1 = 0;
   for (int i = 0; i < size_m1; i++) {
-    float res1 = 0;
     s21_from_decimal_to_float(m1[i], &res1);
   }
+  s21_from_decimal_to_float((s21_decimal){{1, 0, 0, e1*33}}, &res1);
 }
 
 START_TEST(test_all) {
@@ -305,6 +291,24 @@ START_TEST(test_all) {
                       {{UINT_MAX, 4312, 4291264512, 0}},
                       {{2111111, 112312366, 121355, 0}},
                       {{1, 0, 0, e1}}};
+  s21_decimal m4[] = {{{0, 100, 0, e1}},
+                      {{UINT_MAX, 0, 0, e1*15}},
+                      {{0, UINT_MAX, 523798, e1*2 | MINUS}},
+                      {{0, UINT_MAX, 100, e1*5}},
+                      {{UINT_MAX, 1, 0, e1*10}},
+                      {{UINT_MAX, UINT_MAX, UINT_MAX, MINUS}},
+                      {{0, 0, UINT_MAX, e1 * 16}},
+                      {{0, 0, 100, MINUS}}};
+  s21_decimal m6[] = {{{1249184, 213, 1, e1*5}},
+                      {{1453254535, 2123413241, 21367563, e1*17}},
+                      {{5555, 9999999, 0, e1*6 | MINUS}},
+                      {{1, 0, 0, e1*15 | MINUS}},
+                      {{UINT_MAX, UINT_MAX, UINT_MAX, MINUS}},
+                      {{UINT_MAX, 2, 12343214, 0}},
+                      {{22222, 13, 132154, e1*4 | MINUS}},
+                      {{0, 0, 0, 0}},
+                      {{1, 0, 0, e1*15}},
+                      {{2111111, 112312366, 121355, e1*15}}};
   int m3[] = {
       5123,       2135653,   -1237,      -42736,    1,          0,
       -0,         -3241767,  2635,       72136461,  -55555,     21836754,
@@ -312,28 +316,30 @@ START_TEST(test_all) {
       11,         3333,      77777777,   -41348627, 132788,     -888887,
       -153254671, -63583289, 111,        92318,     5,          1111,
       13123132,   32133,     -2373176,   123,       -132358999, 92178361,
-      888888888,  81237373,  1111,       18387471,
+      888888888,  81237373,  18387471,  s21_inf,    -s21_inf,   s21_nan,
   };
   float m5[] = {
       5123.123213,   2135653.111,      -1237.321,     -42736.1,
-      1.99999999,    0.12343,          -0.0000321,    -3241767,
+      1.99999999,    0.12343,          -0.0000321,    79228162514264337593543950335.0,
       2635.7421362,  72136461.111,     5.00032,       218367542,
       -UINT_MAX,     UINT_MAX,         11.123,        999999999.34,
       111111111.11,  55555555.222,     113.566777,    3333.98765545677,
       77777777.3124, -41348627.3547,   132788.132798, -888887.237896,
       -153254671,    -63583289.781236, 111.1111111,   92318.666666,
-      5.7777777777,  1111.12365871,
+      5.7777777777,  s21_inf,          -s21_inf,      s21_nan,
   };
   int size_m1 = sizeof(m1) / sizeof(m1[0]);
   int size_m2 = sizeof(m2) / sizeof(m2[0]);
   int size_m3 = sizeof(m3) / sizeof(m3[0]);
+  int size_m4 = sizeof(m4) / sizeof(m4[0]);
   int size_m5 = sizeof(m5) / sizeof(m5[0]);
+  int size_m6 = sizeof(m6) / sizeof(m6[0]);
   test_add(m1, m2, size_m1, size_m2);
   test_sub(m1, m2, size_m1, size_m2);
   test_sub(m2, m1, size_m2, size_m1);
   test_mul(m1, m2, size_m1, size_m2);
-  test_div(m1, m2, size_m1, size_m2);
-  test_mod(m1, m2, size_m1, size_m2);
+  test_div(m4, m6, size_m4, size_m6);
+  test_mod(m4, m6, size_m4, size_m6);
   test_equal(m1, m2, size_m1, size_m2);
   test_not_equal(m1, m2, size_m1, size_m2);
   test_less(m1, m2, size_m1, size_m2);
