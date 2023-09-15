@@ -4,13 +4,6 @@ CFLAGS = -Wall -Werror -Wextra -std=c11 -pedantic
 SOURCES = $(wildcard functions/*.c)
 OBJECTS = $(SOURCES:.c=.o)
 
-tt: clean s21_decimal.a
-	@clear
-	@gcc tests/main.c s21_decimal.a -lm -o temp
-# @gcc ../s21_decimal1/src/1.c ../s21_decimal1/src/s21_decimal.a -lm -o temp1
-# @./temp1
-	@./temp
-
 s21_decimal.a: clean $(OBJECTS)
 	ar rcs $@ $(OBJECTS)
 	ranlib s21_decimal.a
@@ -28,16 +21,15 @@ gcov_report:
 	rm -rf $(OBJECTS) s21_decimal.a test *.gc* test_gcov/*.gc*
 
 clean:
-	clear
-	@rm -rf functions/*.o *.a *.gc* tt git my gcov_report
+	@rm -rf functions/*.o *.a *.gc* test gcov_report
 
-all: s21_decimal.a
+all: s21_decimal.a test gcov_report
 
 cpp:
-	@cppcheck —enable=all —suppress=missingIncludeSystem *.c
+	@cppcheck —enable=all —suppress=missingIncludeSystem functions/*.c
 
 clang:
-	@clang-format -n *.c *.h
+	@clang-format -n functions/*.c *.h tests/*.c
 
-valgrind:
+valgrind: test
 	@valgrind ./test

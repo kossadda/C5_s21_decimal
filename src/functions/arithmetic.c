@@ -8,7 +8,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   s21_decimal temp1 = value_1;
   s21_decimal temp2 = value_2;
   ret_value = check_small_value(&value_1, &value_2);
-  if(!ret_value) {
+  if (!ret_value) {
     if (sign1 && !sign2) {
       s21_set_sign(&value_1, 0);
       if (s21_is_less(value_2, value_1)) {
@@ -38,7 +38,8 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         ret_value = s21_add_logic(value_1, value_2, result);
         s21_set_sign(&value_1, 0);
         s21_set_sign(&value_2, 0);
-        if (s21_is_greater(*result, value_1) || s21_is_greater(*result, value_2)) {
+        if (s21_is_greater(*result, value_1) ||
+            s21_is_greater(*result, value_2)) {
           s21_set_sign(result, 1);
         }
       }
@@ -108,7 +109,8 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   bool sign1 = s21_get_sign(value_1);
   bool sign2 = s21_get_sign(value_2);
   ret_value = s21_mul_logic(value_1, value_2, result);
-  if ((((sign1 && !sign2) || (!sign1 && sign2))) && !decimal_is_empty(*result)) {
+  if ((((sign1 && !sign2) || (!sign1 && sign2))) &&
+      !decimal_is_empty(*result)) {
     s21_set_sign(result, 1);
   }
   s21_set_scale(result, s21_get_scale(value_1) + s21_get_scale(value_2));
@@ -118,18 +120,21 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 // Деление двух чисел decimal
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int ret_value = 0;
-  if(decimal_is_empty(value_2)) {
+  if (decimal_is_empty(value_2)) {
     ret_value = 3;
   } else {
     bool sign1 = s21_get_sign(value_1);
     bool sign2 = s21_get_sign(value_2);
-    ret_value =  s21_div_logic(value_1, value_2, result);
-    if(ret_value) {
-      if((sign1 && !sign2) || (!sign1 && sign2)) ret_value = 2;
+    ret_value = s21_div_logic(value_1, value_2, result);
+    if (ret_value) {
+      if ((sign1 && !sign2) || (!sign1 && sign2)) ret_value = 2;
       clean_decimal(result);
     } else {
-      s21_set_scale(result, abs(s21_get_scale(value_1) - s21_get_scale(value_2) + s21_get_scale(*result)));
-      if (((sign1 && !sign2) || (!sign1 && sign2)) && !decimal_is_empty(*result)) {
+      s21_set_scale(result,
+                    abs(s21_get_scale(value_1) - s21_get_scale(value_2) +
+                        s21_get_scale(*result)));
+      if (((sign1 && !sign2) || (!sign1 && sign2)) &&
+          !decimal_is_empty(*result)) {
         s21_set_sign(result, 1);
       }
     }
@@ -140,7 +145,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 // Остаток от деления двух чисел decimal
 int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int ret_value = 0;
-  if(decimal_is_empty(value_2)) {
+  if (decimal_is_empty(value_2)) {
     ret_value = 3;
   } else {
     int scale1 = s21_get_scale(value_1);
@@ -153,29 +158,35 @@ int s21_mod(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     if (s21_is_less(value_1, value_2)) {
       *result = value_1;
     } else {
-      if(scale1 != scale2) {
-        for(int i = 0; i < scale1 + scale2; i++) {
-          if (i < scale2) big_decimal_mul(val1_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0 ,0}}, &val1_big);
-          if (i < scale1) big_decimal_mul(val2_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0 ,0}}, &val2_big);
+      if (scale1 != scale2) {
+        for (int i = 0; i < scale1 + scale2; i++) {
+          if (i < scale2)
+            big_decimal_mul(val1_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                            &val1_big);
+          if (i < scale1)
+            big_decimal_mul(val2_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                            &val2_big);
         }
       }
       if (s21_is_not_equal(value_1, value_2)) {
         big_res = big_decimal_div(val1_big, val2_big, &big_res);
         while (!big_decimal_is_empty(big_res)) {
-          big_decimal_div(big_res, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &big_res);
+          big_decimal_div(big_res, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                          &big_res);
           scale1--;
         }
         *result = big_decimal_to_small(big_res);
       }
       if (!decimal_is_empty(*result)) {
-        if(scale1 != scale2) {
+        if (scale1 != scale2) {
           s21_set_scale(result, scale1 + scale2);
         } else {
           s21_set_scale(result, scale1);
         }
       }
     }
-    if (((sign1 && !sign2) || (!sign1 && sign2)) && !decimal_is_empty(*result)) {
+    if (((sign1 && !sign2) || (!sign1 && sign2)) &&
+        !decimal_is_empty(*result)) {
       s21_set_sign(result, sign1);
     }
   }

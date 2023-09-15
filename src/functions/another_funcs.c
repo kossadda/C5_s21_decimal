@@ -47,7 +47,8 @@ bool normalization(s21_decimal *value_1, s21_decimal *value_2) {
 }
 
 // Дополнительные условия нормализации двух чисел decimal
-void post_normalization(s21_decimal *value_1, s21_decimal *value_2, s21_decimal temp1, s21_decimal temp2) {
+void post_normalization(s21_decimal *value_1, s21_decimal *value_2,
+                        s21_decimal temp1, s21_decimal temp2) {
   int exp1 = s21_get_scale(temp1);
   int exp2 = s21_get_scale(temp2);
   int res_exp = s21_get_scale(*value_1);
@@ -71,7 +72,9 @@ void post_normalization(s21_decimal *value_1, s21_decimal *value_2, s21_decimal 
     s21_set_scale(value_1, res_exp);
     s21_set_scale(value_2, res_exp);
   }
-  if (value_1->bits[0] == value_1->bits[1] && value_1->bits[1] == value_1->bits[2] && value_1->bits[0] == UINT_MAX && !s21_get_scale(*value_1)) {
+  if (value_1->bits[0] == value_1->bits[1] &&
+      value_1->bits[1] == value_1->bits[2] && value_1->bits[0] == UINT_MAX &&
+      !s21_get_scale(*value_1)) {
     if (decimal_is_empty(*value_2)) {
       clean_decimal(value_1);
     }
@@ -81,7 +84,7 @@ void post_normalization(s21_decimal *value_1, s21_decimal *value_2, s21_decimal 
 // Проверяет слишком маленькое ли число
 int check_small_value(s21_decimal *value_1, s21_decimal *value_2) {
   int ret_value = 0;
-  if(s21_get_scale(*value_1) > 28 && s21_get_scale(*value_2) > 28) {
+  if (s21_get_scale(*value_1) > 28 && s21_get_scale(*value_2) > 28) {
     clean_decimal(value_1);
     clean_decimal(value_2);
     ret_value = 2;
@@ -92,10 +95,11 @@ int check_small_value(s21_decimal *value_1, s21_decimal *value_2) {
 // Возвращает float в виде целого числа
 unsigned int factor_exp(double number, int accuracy) {
   unsigned int length = 10;
-  for(int i = 1; i < accuracy; i++) {
+  for (int i = 1; i < accuracy; i++) {
     length *= 10;
   }
-  long double double_tmp = ceill((number - truncl(number)) * powl(10, accuracy) - 0.5);
+  long double double_tmp =
+      ceill((number - truncl(number)) * powl(10, accuracy) - 0.5);
   unsigned int integ = (unsigned int)number * length + (unsigned int)double_tmp;
   return integ;
 }
@@ -105,7 +109,8 @@ unsigned int factor_exp(double number, int accuracy) {
 // ========================================================================================================
 
 // Логика сложения двух чисел decimal
-int s21_add_logic(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+int s21_add_logic(s21_decimal value_1, s21_decimal value_2,
+                  s21_decimal *result) {
   clean_decimal(result);
   int sign1 = s21_get_sign(value_1);
   int sign2 = s21_get_sign(value_2);
@@ -113,11 +118,14 @@ int s21_add_logic(s21_decimal value_1, s21_decimal value_2, s21_decimal *result)
   big_decimal_add(small_decimal_to_big(value_1), small_decimal_to_big(value_2),
                   &res_big);
   if (big_decimal_is_empty(res_big)) *result = big_decimal_to_small(res_big);
-  return (!big_decimal_is_empty(res_big)) ? (((sign1 && sign2) || (sign1 && !sign2)) ? 2 : 1) : 0;
+  return (!big_decimal_is_empty(res_big))
+             ? (((sign1 && sign2) || (sign1 && !sign2)) ? 2 : 1)
+             : 0;
 }
 
 // Логика вычитания двух чисел decimal
-void s21_sub_logic(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+void s21_sub_logic(s21_decimal value_1, s21_decimal value_2,
+                   s21_decimal *result) {
   clean_decimal(result);
   s21_big_decimal res_big = {{0, 0, 0, 0}};
   big_decimal_sub(small_decimal_to_big(value_1), small_decimal_to_big(value_2),
@@ -126,7 +134,8 @@ void s21_sub_logic(s21_decimal value_1, s21_decimal value_2, s21_decimal *result
 }
 
 // Логика умножения двух чисел decimal
-int s21_mul_logic(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+int s21_mul_logic(s21_decimal value_1, s21_decimal value_2,
+                  s21_decimal *result) {
   clean_decimal(result);
   int sign1 = s21_get_sign(value_1);
   int sign2 = s21_get_sign(value_2);
@@ -134,11 +143,14 @@ int s21_mul_logic(s21_decimal value_1, s21_decimal value_2, s21_decimal *result)
   big_decimal_mul(small_decimal_to_big(value_1), small_decimal_to_big(value_2),
                   &res_big);
   if (big_decimal_is_empty(res_big)) *result = big_decimal_to_small(res_big);
-  return (!big_decimal_is_empty(res_big)) ? (((!sign1 && sign2) || (sign1 && !sign2)) ? 2 : 1) : 0;
+  return (!big_decimal_is_empty(res_big))
+             ? (((!sign1 && sign2) || (sign1 && !sign2)) ? 2 : 1)
+             : 0;
 }
 
 // Логика деления двух чисел decimal с остатком
-int s21_div_logic(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+int s21_div_logic(s21_decimal value_1, s21_decimal value_2,
+                  s21_decimal *result) {
   bool period = 0;
   int scale = 0;
   clean_decimal(result);
@@ -148,34 +160,41 @@ int s21_div_logic(s21_decimal value_1, s21_decimal value_2, s21_decimal *result)
   s21_big_decimal temp = {{0, 0, 0, 0}};
   s21_big_decimal mod = {{1, 0, 0, 0}};
   while (s21_big_decimal_less_or_equal(val1_big, val2_big)) {
-    big_decimal_mul(val1_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &val1_big);
+    big_decimal_mul(val1_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                    &val1_big);
     scale++;
   }
   mod = big_decimal_div(val1_big, val2_big, &res_big);
-  while(!decimal_is_empty(big_decimal_to_small(mod)) && !s21_big_decimal_equal(val1_big, val2_big) && !period) {
-    while(s21_big_decimal_less(mod, val2_big)) {
+  while (!decimal_is_empty(big_decimal_to_small(mod)) &&
+         !s21_big_decimal_equal(val1_big, val2_big) && !period) {
+    while (s21_big_decimal_less(mod, val2_big)) {
       big_decimal_mul(mod, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &mod);
-      big_decimal_mul(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &res_big);
-      if(big_decimal_is_empty(res_big)) {
+      big_decimal_mul(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                      &res_big);
+      if (big_decimal_is_empty(res_big)) {
         scale++;
       } else {
-        big_decimal_div(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &res_big);
+        big_decimal_div(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                        &res_big);
         period = true;
       }
     }
-    if(!period) {
+    if (!period) {
       mod = big_decimal_div(mod, val2_big, &temp);
       big_decimal_add(temp, res_big, &res_big);
     }
-  } 
+  }
   *result = big_decimal_to_small(res_big);
   s21_set_scale(result, scale);
-  for(int i = 0; i < s21_get_scale(value_1) + s21_get_scale(value_2) + scale; i++) {
+  for (int i = 0; i < s21_get_scale(value_1) + s21_get_scale(value_2) + scale;
+       i++) {
     if (i < s21_get_scale(value_1) + scale) {
-      big_decimal_div(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0 ,0}}, &res_big);
+      big_decimal_div(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                      &res_big);
     }
     if (i < s21_get_scale(value_2)) {
-      big_decimal_mul(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0 ,0}}, &res_big);
+      big_decimal_mul(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                      &res_big);
     }
   }
   return (big_decimal_is_empty(res_big)) ? 0 : 1;
@@ -291,7 +310,8 @@ void shift_big_decimal_right(s21_big_decimal *value, int shift) {
 
 // Проверка на пустой big decimal
 int big_decimal_is_empty(s21_big_decimal value) {
-  return (value.bits[3] + value.bits[4] + value.bits[5] + value.bits[6]) ? 0 : 1;
+  return (value.bits[3] + value.bits[4] + value.bits[5] + value.bits[6]) ? 0
+                                                                         : 1;
 }
 
 // Очистить число big decimal
@@ -320,24 +340,28 @@ s21_decimal big_decimal_to_small(s21_big_decimal converting) {
 }
 
 // Сложение двух чисел big decimal
-void big_decimal_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal *result) {
+void big_decimal_add(s21_big_decimal value_1, s21_big_decimal value_2,
+                     s21_big_decimal *result) {
   clean_big_decimal(result);
   int overflow = 0;
   int bit_sum = 0;
   for (int i = 0; i < 224; i++) {
-    bit_sum = get_big_decimal_bit(value_1, i) + get_big_decimal_bit(value_2, i) + overflow;
+    bit_sum = get_big_decimal_bit(value_1, i) +
+              get_big_decimal_bit(value_2, i) + overflow;
     overflow = bit_sum / 2;
     set_big_decimal_bit(result, i, bit_sum % 2);
   }
 }
 
 // Вычитание двух чисел big decimal
-void big_decimal_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal *result) {
+void big_decimal_sub(s21_big_decimal value_1, s21_big_decimal value_2,
+                     s21_big_decimal *result) {
   clean_big_decimal(result);
   int rent = 0;
   int bit_sub = 0;
   for (int i = 0; i < 224; i++) {
-    bit_sub = get_big_decimal_bit(value_1, i) - get_big_decimal_bit(value_2, i) - rent;
+    bit_sub = get_big_decimal_bit(value_1, i) -
+              get_big_decimal_bit(value_2, i) - rent;
     rent = bit_sub < 0;
     bit_sub = abs(bit_sub);
     set_big_decimal_bit(result, i, bit_sub % 2);
@@ -345,7 +369,8 @@ void big_decimal_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_d
 }
 
 // Умножение двух чисел big decimal
-void big_decimal_mul(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal *result) {
+void big_decimal_mul(s21_big_decimal value_1, s21_big_decimal value_2,
+                     s21_big_decimal *result) {
   clean_big_decimal(result);
   int error = 0;
   int count = 0;
@@ -359,7 +384,9 @@ void big_decimal_mul(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_d
 }
 
 // Деление двух чисел big decimal нацело (функция возвращает остаток)
-s21_big_decimal big_decimal_div(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal *result) {
+s21_big_decimal big_decimal_div(s21_big_decimal value_1,
+                                s21_big_decimal value_2,
+                                s21_big_decimal *result) {
   clean_big_decimal(result);
   if (s21_big_decimal_equal(value_1, value_2)) {
     result->bits[0] = 1;
@@ -417,6 +444,9 @@ int s21_big_decimal_less(s21_big_decimal value_1, s21_big_decimal value_2) {
 }
 
 // Оператор сравнения чисел big decimal <=
-int s21_big_decimal_less_or_equal(s21_big_decimal value_1, s21_big_decimal value_2) {
-  return (s21_big_decimal_equal(value_1, value_2)) ? 1 : s21_big_decimal_less(value_1, value_2);
+int s21_big_decimal_less_or_equal(s21_big_decimal value_1,
+                                  s21_big_decimal value_2) {
+  return (s21_big_decimal_equal(value_1, value_2))
+             ? 1
+             : s21_big_decimal_less(value_1, value_2);
 }
