@@ -67,13 +67,13 @@ int s21_add_logic(s21_decimal value_1, s21_decimal value_2,
                   s21_decimal *result);
 void s21_sub_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
-int s21_mul_logic(s21_decimal value_1, s21_decimal value_2,
-                  s21_decimal *result);
 int s21_div_logic(s21_decimal value_1, s21_decimal value_2,
                   s21_decimal *result);
+void div_rest_part(s21_big_decimal val1_big, s21_big_decimal val2_big, s21_big_decimal *res_big, int *scale);
 int last_num_in_decimal(s21_decimal value);
 unsigned int factor_exp(double number, int accuracy);
 void clean_decimal(s21_decimal *value);
+void bank_round(s21_decimal *value, int round_val);
 int length_num(unsigned long long num);
 int decimal_is_empty(s21_decimal value);
 
@@ -101,6 +101,7 @@ s21_big_decimal big_decimal_div(s21_big_decimal value_1,
                                 s21_big_decimal value_2,
                                 s21_big_decimal *result);
 int big_decimal_is_empty(s21_big_decimal value);
+int last_num_in_big_decimal(s21_big_decimal value);
 int s21_big_decimal_equal(s21_big_decimal value_1, s21_big_decimal value_2);
 int s21_big_decimal_less(s21_big_decimal value_1, s21_big_decimal value_2);
 int s21_big_decimal_less_or_equal(s21_big_decimal value_1,

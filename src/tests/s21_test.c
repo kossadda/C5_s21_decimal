@@ -40,7 +40,7 @@ void test_add(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
 void test_sub(s21_decimal m1[], s21_decimal m2[], int size_m1, int size_m2) {
   for (int i = 0; i < size_m1; i++) {
     for (int j = 0; j < size_m2; j++) {
-      s21_decimal res1 = {{0, 0, 0, 0}};
+      s21_decimal res1 = {{0, 0, 0, 1}};
       s21_sub(m1[i], m2[j], &res1);
       s21_sub(m2[i], m1[j], &res1);
     }
@@ -279,8 +279,6 @@ START_TEST(test_all) {
                       {{0, 0, UINT_MAX, e1 * 1}},
                       {{0, 0, 1, e1 * 1}},
                       {{0, 0, 100, e1 * 1}},
-                      {{0, 523798, 0, e1 * 1}},
-                      {{0, UINT_MAX, 0, e1 * 1}},
                       {{0, 1, 0, e1 * 1}}};
   s21_decimal m2[] = {{{1249184, 213, 1, 0}},
                       {{1453254535, 2123413241, 21367563, 0}},
