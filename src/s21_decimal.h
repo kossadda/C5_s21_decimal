@@ -69,7 +69,8 @@ void s21_sub_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
 int s21_div_logic(s21_decimal value_1, s21_decimal value_2,
                   s21_decimal *result);
-void div_rest_part(s21_big_decimal val1_big, s21_big_decimal val2_big, s21_big_decimal *res_big, int *scale);
+void div_rest_part(s21_big_decimal mod, s21_big_decimal val1_big, s21_big_decimal val2_big, s21_big_decimal *res_big, int *scale);
+int overflow_check(s21_decimal value_1, s21_decimal value_2, s21_big_decimal *res_big);
 int last_num_in_decimal(s21_decimal value);
 unsigned int factor_exp(double number, int accuracy);
 void clean_decimal(s21_decimal *value);

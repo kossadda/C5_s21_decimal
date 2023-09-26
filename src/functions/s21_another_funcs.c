@@ -84,7 +84,7 @@ void post_normalization(s21_decimal *value_1, s21_decimal *value_2,
 // Проверяет слишком маленькое ли число
 int check_small_value(s21_decimal *value_1, s21_decimal *value_2) {
     int ret_value = 0;
-    if (s21_get_scale(*value_1) > 28 && s21_get_scale(*value_2) > 28) {
+    if (s21_get_scale(*value_1) > 29 && s21_get_scale(*value_2) > 29) {
         clean_decimal(value_1);
         clean_decimal(value_2);
         ret_value = 2;
@@ -138,35 +138,42 @@ void s21_sub_logic(s21_decimal value_1, s21_decimal value_2,
 int s21_div_logic(s21_decimal value_1, s21_decimal value_2,
                   s21_decimal *result) {
     int round_val = 0;
-    int scale = abs(s21_get_scale(value_1) - s21_get_scale(value_2));
+    int scale = s21_get_scale(value_1) - s21_get_scale(value_2);
     clean_decimal(result);
     s21_big_decimal val1_big = small_decimal_to_big(value_1);
     s21_big_decimal val2_big = small_decimal_to_big(value_2);
     s21_big_decimal res_big = {{0, 0, 0, 0, 0, 0, 0}};
-    while (s21_big_decimal_less_or_equal(val1_big, val2_big)) {
+    s21_big_decimal mod = {{0, 0, 0, 0, 0, 0, 0}};
+    while (s21_big_decimal_less(val1_big, val2_big)) {
         big_decimal_mul(val1_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
                         &val1_big);
         scale++;
     }
-    div_rest_part(val1_big, val2_big, &res_big, &scale);
-    while(!big_decimal_is_empty(res_big) && scale) {
-        if(!(res_big.bits[4] && res_big.bits[5] && res_big.bits[6])) {
-            round_val = last_num_in_big_decimal(res_big);
+    mod = big_decimal_div(val1_big, val2_big, &res_big);
+    int check = overflow_check(value_1, value_2, &res_big);
+    if(!check) {
+        div_rest_part(mod, val1_big, val2_big, &res_big, &scale);
+        while(!big_decimal_is_empty(res_big) && scale) {
+            if(!(res_big.bits[4] && res_big.bits[5] && res_big.bits[6])) {
+                round_val = last_num_in_big_decimal(res_big);
+            }
+            big_decimal_div(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &res_big);
+            scale--;
         }
-        big_decimal_div(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &res_big);
-        scale--;
+        while (scale < 0) {
+            big_decimal_mul(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &res_big);
+            scale++;
+        }
+        *result = big_decimal_to_small(res_big);
+        s21_set_scale(result, scale);
     }
-    *result = big_decimal_to_small(res_big);
-    bank_round(result, round_val);
-    s21_set_scale(result, scale);
-    return (big_decimal_is_empty(res_big)) ? 0 : 1;
+    bank_round(result, round_val); 
+    return (!check) ? 0 : 1;
 }
 
-void div_rest_part(s21_big_decimal val1_big, s21_big_decimal val2_big, s21_big_decimal *res_big, int *scale) {
+void div_rest_part(s21_big_decimal mod, s21_big_decimal val1_big, s21_big_decimal val2_big, s21_big_decimal *res_big, int *scale) {
     bool period = false;
     s21_big_decimal temp = {{0, 0, 0, 0}};
-    s21_big_decimal mod = {{0, 0, 0, 0}};
-    mod = big_decimal_div(val1_big, val2_big, res_big);
     while (!decimal_is_empty(big_decimal_to_small(mod)) &&
            !s21_big_decimal_equal(val1_big, val2_big) && !period) {
         while (s21_big_decimal_less(mod, val2_big)) {
@@ -175,13 +182,12 @@ void div_rest_part(s21_big_decimal val1_big, s21_big_decimal val2_big, s21_big_d
             big_decimal_mul(*res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
                             res_big);
             if (!(res_big->bits[5] && res_big->bits[6])) {
-                if(!(res_big->bits[3] && res_big->bits[2])) (*scale)++;
+                (*scale)++;
             } else {
                 big_decimal_div(*res_big,
                                 (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
                                 res_big);
                 period = true;
-                (*scale)--;
             }
         }
         if (!period) {
@@ -189,6 +195,17 @@ void div_rest_part(s21_big_decimal val1_big, s21_big_decimal val2_big, s21_big_d
             big_decimal_add(temp, *res_big, res_big);
         }
     }
+}
+
+int overflow_check(s21_decimal value_1, s21_decimal value_2, s21_big_decimal *res_big) {
+    s21_big_decimal overflow = *res_big;
+    for(int i = 0; i < s21_get_scale(value_2); i++) {
+        big_decimal_mul(overflow, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &overflow);
+    }
+    for(int i = 0; i < s21_get_scale(value_1); i++) {
+        big_decimal_div(overflow, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &overflow);
+    }
+    return (big_decimal_is_empty(overflow)) ? 0 : 1;
 }
 
 // Возвращает остаток от деления decimal на 10
@@ -223,14 +240,10 @@ void clean_decimal(s21_decimal *value) {
 }
 
 void bank_round(s21_decimal *value, int round_val) {
-    unsigned long long next_val = value->bits[0] + 1;
+    unsigned long long next_val = (s21_get_sign(*value)) ? value->bits[0] - 1 : value->bits[0] + 1;
     if ((round_val > 5 && round_val <= 9) ||
         (round_val == 5 && next_val % 2 == 0)) {
-        if (s21_get_sign(*value)) {
-            s21_sub(*value, (s21_decimal){{1, 0, 0, 0}}, value);
-        } else {
-            s21_add(*value, (s21_decimal){{1, 0, 0, 0}}, value);
-        }
+        s21_add(*value, (s21_decimal){{1, 0, 0, value->bits[3]}}, value);
     }
 }
 // ========================================================================================================

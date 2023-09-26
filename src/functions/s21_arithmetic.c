@@ -121,7 +121,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                          res_big.bits[6])) {
                 round_val = last_num_in_big_decimal(res_big);
             }
-            big_decimal_div(res_big, (s21_big_decimal){10, 0, 0, 0, 0, 0, 0},
+            big_decimal_div(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
                             &res_big);
             scale--;
         }
@@ -142,6 +142,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
 // Деление двух чисел decimal
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    clean_decimal(result);
     int ret_value = 0;
     if (decimal_is_empty(value_2)) {
         ret_value = 3;
