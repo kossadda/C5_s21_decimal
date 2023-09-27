@@ -132,8 +132,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
             !decimal_is_empty(*result)) {
             s21_set_sign(result, 1);
         }
-        bank_round(result, round_val);
-        s21_set_scale(result, scale);
+        normalize_exp(result, scale, round_val);
     }
     return (!big_decimal_is_empty(res_big))
                ? (((!sign1 && sign2) || (sign1 && !sign2)) ? 2 : 1)

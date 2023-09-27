@@ -16,11 +16,11 @@
 #define s21_isinf(X) ((X) == (1.0 / 0.0))
 
 typedef struct {
-  unsigned int bits[4];
+    unsigned int bits[4];
 } s21_decimal;
 
 typedef struct {
-  unsigned int bits[7];
+    unsigned int bits[7];
 } s21_big_decimal;
 
 // Арифметические операторы
@@ -69,8 +69,12 @@ void s21_sub_logic(s21_decimal value_1, s21_decimal value_2,
                    s21_decimal *result);
 int s21_div_logic(s21_decimal value_1, s21_decimal value_2,
                   s21_decimal *result);
-void div_rest_part(s21_big_decimal mod, s21_big_decimal val1_big, s21_big_decimal val2_big, s21_big_decimal *res_big, int *scale);
-int overflow_check(s21_decimal value_1, s21_decimal value_2, s21_big_decimal *res_big);
+void div_rest_part(s21_big_decimal mod, s21_big_decimal val1_big,
+                   s21_big_decimal val2_big, s21_big_decimal *res_big,
+                   int *scale);
+int overflow_check(s21_decimal value_1, s21_decimal value_2,
+                   s21_big_decimal *res_big);
+void normalize_exp(s21_decimal *value, int scale, int round_val);
 int last_num_in_decimal(s21_decimal value);
 unsigned int factor_exp(double number, int accuracy);
 void clean_decimal(s21_decimal *value);

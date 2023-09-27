@@ -81,17 +81,6 @@ void post_normalization(s21_decimal *value_1, s21_decimal *value_2,
     }
 }
 
-// Проверяет слишком маленькое ли число
-int check_small_value(s21_decimal *value_1, s21_decimal *value_2) {
-    int ret_value = 0;
-    if (s21_get_scale(*value_1) > 29 && s21_get_scale(*value_2) > 29) {
-        clean_decimal(value_1);
-        clean_decimal(value_2);
-        ret_value = 2;
-    }
-    return ret_value;
-}
-
 // Возвращает float в виде целого числа
 unsigned int factor_exp(double number, int accuracy) {
     unsigned int length = 10;
@@ -103,6 +92,35 @@ unsigned int factor_exp(double number, int accuracy) {
     unsigned int integ =
         (unsigned int)number * length + (unsigned int)double_tmp;
     return integ;
+}
+
+// Проверяет слишком маленькое ли число
+int check_small_value(s21_decimal *value_1, s21_decimal *value_2) {
+    int ret_value = 0;
+    if (s21_get_scale(*value_1) > 29 && s21_get_scale(*value_2) > 29) {
+        clean_decimal(value_1);
+        clean_decimal(value_2);
+        ret_value = 2;
+    }
+    return ret_value;
+}
+
+// В случае скейла результата > 28 снижает скейл до 28 с банковским округлением
+void normalize_exp(s21_decimal *value, int scale, int round_val) {
+    if (scale > 28) {
+        int sign = s21_get_sign(*value);
+        s21_big_decimal temp = small_decimal_to_big(*value);
+        while (scale > 28) {
+            if (scale == 29) round_val = last_num_in_big_decimal(temp);
+            big_decimal_div(temp, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                            &temp);
+            scale--;
+        }
+        *value = big_decimal_to_small(temp);
+        s21_set_sign(value, sign);
+    }
+    s21_set_scale(value, scale);
+    bank_round(value, round_val);
 }
 
 // ========================================================================================================
@@ -151,27 +169,31 @@ int s21_div_logic(s21_decimal value_1, s21_decimal value_2,
     }
     mod = big_decimal_div(val1_big, val2_big, &res_big);
     int check = overflow_check(value_1, value_2, &res_big);
-    if(!check) {
+    if (!check) {
         div_rest_part(mod, val1_big, val2_big, &res_big, &scale);
-        while(!big_decimal_is_empty(res_big) && scale) {
-            if(!(res_big.bits[4] && res_big.bits[5] && res_big.bits[6])) {
+        while (!big_decimal_is_empty(res_big) && scale) {
+            if (!(res_big.bits[4] && res_big.bits[5] && res_big.bits[6])) {
                 round_val = last_num_in_big_decimal(res_big);
             }
-            big_decimal_div(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &res_big);
+            big_decimal_div(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                            &res_big);
             scale--;
         }
         while (scale < 0) {
-            big_decimal_mul(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &res_big);
+            big_decimal_mul(res_big, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                            &res_big);
             scale++;
         }
         *result = big_decimal_to_small(res_big);
-        s21_set_scale(result, scale);
+        normalize_exp(result, scale, round_val);
     }
-    bank_round(result, round_val); 
     return (!check) ? 0 : 1;
 }
 
-void div_rest_part(s21_big_decimal mod, s21_big_decimal val1_big, s21_big_decimal val2_big, s21_big_decimal *res_big, int *scale) {
+// Вычисление деления с остатком
+void div_rest_part(s21_big_decimal mod, s21_big_decimal val1_big,
+                   s21_big_decimal val2_big, s21_big_decimal *res_big,
+                   int *scale) {
     bool period = false;
     s21_big_decimal temp = {{0, 0, 0, 0}};
     while (!decimal_is_empty(big_decimal_to_small(mod)) &&
@@ -197,13 +219,17 @@ void div_rest_part(s21_big_decimal mod, s21_big_decimal val1_big, s21_big_decima
     }
 }
 
-int overflow_check(s21_decimal value_1, s21_decimal value_2, s21_big_decimal *res_big) {
+// Проверка на переполнение
+int overflow_check(s21_decimal value_1, s21_decimal value_2,
+                   s21_big_decimal *res_big) {
     s21_big_decimal overflow = *res_big;
-    for(int i = 0; i < s21_get_scale(value_2); i++) {
-        big_decimal_mul(overflow, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &overflow);
+    for (int i = 0; i < s21_get_scale(value_2); i++) {
+        big_decimal_mul(overflow, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                        &overflow);
     }
-    for(int i = 0; i < s21_get_scale(value_1); i++) {
-        big_decimal_div(overflow, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}}, &overflow);
+    for (int i = 0; i < s21_get_scale(value_1); i++) {
+        big_decimal_div(overflow, (s21_big_decimal){{10, 0, 0, 0, 0, 0, 0}},
+                        &overflow);
     }
     return (big_decimal_is_empty(overflow)) ? 0 : 1;
 }
@@ -213,16 +239,6 @@ int last_num_in_decimal(s21_decimal value) {
     for (int i = 2; i >= 0; i--) {
         value.bits[i] %= 10;
         if (i != 2) {
-            value.bits[i] += (unsigned long long)(value.bits[i + 1] * MAX) % 10;
-        }
-    }
-    return value.bits[0] % 10;
-}
-
-int last_num_in_big_decimal(s21_big_decimal value) {
-    for (int i = 3; i >= 0; i--) {
-        value.bits[i] %= 10;
-        if (i != 3) {
             value.bits[i] += (unsigned long long)(value.bits[i + 1] * MAX) % 10;
         }
     }
@@ -239,13 +255,16 @@ void clean_decimal(s21_decimal *value) {
     for (int i = 0; i < 4; i++) value->bits[i] = 0;
 }
 
+// Банковское округление decimal
 void bank_round(s21_decimal *value, int round_val) {
-    unsigned long long next_val = (s21_get_sign(*value)) ? value->bits[0] - 1 : value->bits[0] + 1;
+    unsigned long long next_val =
+        (s21_get_sign(*value)) ? value->bits[0] - 1 : value->bits[0] + 1;
     if ((round_val > 5 && round_val <= 9) ||
         (round_val == 5 && next_val % 2 == 0)) {
         s21_add(*value, (s21_decimal){{1, 0, 0, value->bits[3]}}, value);
     }
 }
+
 // ========================================================================================================
 // Работа с битами
 // ========================================================================================================
@@ -474,4 +493,15 @@ int s21_big_decimal_less_or_equal(s21_big_decimal value_1,
     return (s21_big_decimal_equal(value_1, value_2))
                ? 1
                : s21_big_decimal_less(value_1, value_2);
+}
+
+// Возвращает остаток от деления big decimal на 10
+int last_num_in_big_decimal(s21_big_decimal value) {
+    for (int i = 3; i >= 0; i--) {
+        value.bits[i] %= 10;
+        if (i != 3) {
+            value.bits[i] += (unsigned long long)(value.bits[i + 1] * MAX) % 10;
+        }
+    }
+    return value.bits[0] % 10;
 }
