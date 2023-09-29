@@ -1601,30 +1601,30 @@ END_TEST
 START_TEST(dec_int_all) {
     s21_decimal m1[] = {{{0, 100, 0, e1}},
                         {{523798, 0, 0, e1}},
-                        {{UINT_MAX, 0, 0, e1}},
+                        {{UINT_MAX, 0, 0, e1 | MINUS}},
                         {{1, 0, 0, 0}},
                         {{100, 0, 0, 0}},
                         {{0, UINT_MAX, 523798, e1 * 2}},
-                        {{0, UINT_MAX, UINT_MAX, 0}},
-                        {{0, UINT_MAX, 1, 0}},
+                        {{0, UINT_MAX, UINT_MAX, 0 | MINUS}},
+                        {{0, UINT_MAX, 1, 0 | MINUS}},
                         {{0, UINT_MAX, 100, 0}},
                         {{UINT_MAX, 523798, 0, 0}},
-                        {{UINT_MAX, UINT_MAX, 0, 0}},
+                        {{UINT_MAX, UINT_MAX, 0, 0 | MINUS}},
                         {{UINT_MAX, 1, 0, 0}},
                         {{UINT_MAX, 100, 0, 0}},
                         {{523798, 523798, 523798, 0}},
-                        {{UINT_MAX, 0, 100, 0}},
+                        {{UINT_MAX, 0, 100, 0 | MINUS}},
                         {{1, 0, 1, 0}},
                         {{325, 9999, 0, 0}},
                         {{1, 1, 1, 0}},
                         {{UINT_MAX, UINT_MAX, UINT_MAX, 0}},
                         {{2136, 12366, 21355, 0}},
                         {{999999, 999999, 999999, 0}},
-                        {{0, 0, 523798, e1}},
+                        {{0, 0, 523798, e1 | MINUS}},
                         {{0, 0, UINT_MAX, e1}},
                         {{0, 0, 1, e1}},
                         {{0, 0, 100, e1}},
-                        {{0, 523798, 0, e1}},
+                        {{0, 523798, 0, e1 | MINUS}},
                         {{0, UINT_MAX, 0, e1}},
                         {{0, 1, 0, e1}}};
     int size_m1 = sizeof(m1) / sizeof(m1[0]);
@@ -1660,28 +1660,28 @@ START_TEST(dec_float_all_0) {
     s21_decimal m1[] = {{{0, 100, 0, e1}},
                         {{523798, 0, 0, e1}},
                         {{UINT_MAX, 0, 0, e1}},
-                        {{1, 0, 0, 0}},
+                        {{1, 0, 0, 0 | MINUS}},
                         {{100, 0, 0, 0}},
                         {{0, UINT_MAX, 523798, e1 * 2}},
                         {{0, UINT_MAX, UINT_MAX, 0}},
-                        {{0, UINT_MAX, 1, 0}},
+                        {{0, UINT_MAX, 1, 0 | MINUS}},
                         {{0, UINT_MAX, 100, 0}},
                         {{UINT_MAX, 523798, 0, 0}},
-                        {{UINT_MAX, UINT_MAX, 0, 0}},
+                        {{UINT_MAX, UINT_MAX, 0, 0 | MINUS}},
                         {{UINT_MAX, 1, 0, 0}},
                         {{UINT_MAX, 100, 0, 0}},
                         {{523798, 523798, 523798, 0}},
-                        {{UINT_MAX, 0, 100, 0}},
+                        {{UINT_MAX, 0, 100, 0 | MINUS}},
                         {{1, 0, 1, 0}},
                         {{325, 9999, 0, 0}},
                         {{1, 1, 1, 0}},
-                        {{UINT_MAX, UINT_MAX, UINT_MAX, 0}},
+                        {{UINT_MAX, UINT_MAX, UINT_MAX, 0 | MINUS}},
                         {{2136, 12366, 21355, 0}},
                         {{999999, 999999, 999999, 0}},
-                        {{0, 0, 523798, e1}},
+                        {{0, 0, 523798, e1 | MINUS}},
                         {{0, 0, UINT_MAX, e1}},
                         {{0, 0, 1, e1}},
-                        {{0, 0, 100, e1}},
+                        {{0, 0, 100, e1 | MINUS}},
                         {{0, 523798, 0, e1}},
                         {{0, UINT_MAX, 0, e1}},
                         {{0, 1, 0, e1}}};
@@ -1988,7 +1988,7 @@ START_TEST(round_0) {
 }
 END_TEST
 
-Suite *s21_string_suite(void) {
+Suite *s21_decimal_suite(void) {
     Suite *suite = suite_create("s21_decimal");
 
     TCase *tc_test_add = tcase_create("test_add");
@@ -2139,7 +2139,7 @@ Suite *s21_string_suite(void) {
 }
 
 int main(void) {
-    Suite *suite = s21_string_suite();
+    Suite *suite = s21_decimal_suite();
     SRunner *suite_runner = srunner_create(suite);
     srunner_run_all(suite_runner, CK_NORMAL);
     int failed_count = srunner_ntests_failed(suite_runner);
